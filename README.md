@@ -104,5 +104,31 @@ Para feedbacks, sugestões ou dúvidas:
 - E-mail: [seu-email@exemplo.com](mailto:seu-email@exemplo.com)
 - Twitter: [@seu_usuario](https://twitter.com/seu_usuario)
 
+## Configuração no Railway
+
+Para que o projeto funcione corretamente no Railway, siga estas etapas:
+
+1. Crie uma nova aplicação no Railway a partir do repositório GitHub.
+
+2. Configure as variáveis de ambiente necessárias no painel do Railway:
+   - `APP_ENV=production`
+   - `APP_KEY=` (deixe em branco e o Railway vai gerar durante o deploy)
+   - `APP_DEBUG=false`
+   - `APP_URL=` (URL fornecida pelo Railway)
+   - `DB_CONNECTION=sqlite`
+   - `DB_DATABASE=/project/database/database.sqlite`
+   - `SESSION_DRIVER=database`
+   - `CACHE_DRIVER=database`
+   - `QUEUE_CONNECTION=database`
+
+3. Adicione uma configuração na aba "Settings" do Railway:
+   - Clique em "Generate Domain" para obter uma URL pública
+
+4. O sistema deve migrar o banco de dados automaticamente durante o deploy por meio do comando no Procfile.
+
+## Solução de problemas
+
+Se encontrar erros, verifique os logs do Railway para identificar os problemas específicos.
+
 ---
 Feito com 💚💛 no Brasil 

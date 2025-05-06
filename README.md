@@ -104,27 +104,62 @@ Para feedbacks, sugestões ou dúvidas:
 - E-mail: [seu-email@exemplo.com](mailto:seu-email@exemplo.com)
 - Twitter: [@seu_usuario](https://twitter.com/seu_usuario)
 
+## Configuração Docker
+
+Este projeto está configurado para rodar com Docker. Siga os passos abaixo para configurar o ambiente de desenvolvimento:
+
+### Pré-requisitos
+- Docker
+- Docker Compose
+
+### Configuração de desenvolvimento
+1. Clone o repositório
+2. Execute o build dos containers Docker:
+   ```bash
+   docker-compose build
+   ```
+3. Inicie os containers:
+   ```bash
+   docker-compose up -d
+   ```
+4. Acesse o aplicativo em `http://localhost:8000`
+5. O frontend de desenvolvimento estará disponível em `http://localhost:5173`
+
+### Comandos úteis
+- Para acessar o container principal:
+  ```bash
+  docker-compose exec app bash
+  ```
+- Para parar os containers:
+  ```bash
+  docker-compose down
+  ```
+- Para rodar migrações:
+  ```bash
+  docker-compose exec app php artisan migrate
+  ```
+
 ## Configuração no Railway
 
 Para que o projeto funcione corretamente no Railway, siga estas etapas:
 
-1. Crie uma nova aplicação no Railway a partir do repositório GitHub.
+1. Conecte seu repositório ao Railway.
 
-2. Configure as variáveis de ambiente necessárias no painel do Railway:
+2. O projeto inclui um arquivo `.railway.toml` que automatiza a maior parte do deploy.
+
+3. Configure as seguintes variáveis de ambiente no Railway:
    - `APP_ENV=production`
-   - `APP_KEY=` (deixe em branco e o Railway vai gerar durante o deploy)
+   - `APP_KEY=` (Railway vai gerar automaticamente)
    - `APP_DEBUG=false`
    - `APP_URL=` (URL fornecida pelo Railway)
    - `DB_CONNECTION=sqlite`
-   - `DB_DATABASE=/project/database/database.sqlite`
    - `SESSION_DRIVER=database`
    - `CACHE_DRIVER=database`
    - `QUEUE_CONNECTION=database`
 
-3. Adicione uma configuração na aba "Settings" do Railway:
-   - Clique em "Generate Domain" para obter uma URL pública
+4. O Railway usará o Dockerfile para construir a imagem e rodar o projeto.
 
-4. O sistema deve migrar o banco de dados automaticamente durante o deploy por meio do comando no Procfile.
+5. As migrações serão executadas automaticamente durante o deploy.
 
 ## Solução de problemas
 

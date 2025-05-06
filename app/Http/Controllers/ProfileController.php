@@ -54,13 +54,17 @@ class ProfileController extends Controller
         if ($request->hasFile('avatar_file')) {
             // Remova o avatar antigo se não for uma URL externa
             $oldAvatar = Auth::user()->profile->avatar;
-            if ($oldAvatar && Str::startsWith($oldAvatar, 'avatars/')) {
-                Storage::disk('public')->delete($oldAvatar);
+            if ($oldAvatar && !filter_var($oldAvatar, FILTER_VALIDATE_URL)) {
+                // Limpa o caminho para encontrar o arquivo
+                $oldPath = str_replace('/storage/', '', $oldAvatar);
+                if (!empty($oldPath)) {
+                    Storage::disk('public')->delete($oldPath);
+                }
             }
 
-            // Salve o novo avatar
+            // Salve o novo avatar e armazene apenas o path relativo
             $path = $request->file('avatar_file')->store('avatars', 'public');
-            $validated['avatar'] = Storage::url($path);
+            $validated['avatar'] = '/storage/' . $path;
         }
 
         Auth::user()->profile->update($validated);
@@ -73,7 +77,7 @@ class ProfileController extends Controller
      */
     public function show(string $slug): Response
     {
-        $profile = Profile::where('slug', $slug)->firstOrFail();
+        $profile = Profile::where('slug', $slug)->with('user')->firstOrFail();
         $links = $profile->links()->where('is_active', true)->orderBy('order')->get();
 
         return Inertia::render('Profile/Show', [

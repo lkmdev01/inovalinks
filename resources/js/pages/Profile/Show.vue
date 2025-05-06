@@ -10,7 +10,7 @@ interface Profile {
   slug: string;
   avatar: string | null;
   theme: string;
-  user: {
+  user?: {
     name: string;
   };
 }
@@ -26,6 +26,19 @@ const props = defineProps<{
   profile: Profile;
   links: Link[];
 }>();
+
+// Função para verificar se o avatar é uma URL absoluta ou um caminho relativo
+const getAvatarUrl = computed(() => {
+  if (!props.profile.avatar) return null;
+  
+  // Se já for uma URL completa, retorna como está
+  if (props.profile.avatar.startsWith('http')) {
+    return props.profile.avatar;
+  }
+  
+  // Caso contrário, usa o caminho relativo
+  return props.profile.avatar;
+});
 
 const themeClasses = computed(() => {
   switch (props.profile.theme) {
@@ -70,7 +83,7 @@ const themeClasses = computed(() => {
 </script>
 
 <template>
-  <Head :title="profile.title || `${profile.user.name}'s Links`" />
+  <Head :title="profile.title || (profile.user?.name ? `${profile.user.name}'s Links` : 'Links')" />
 
   <div
     class="flex min-h-screen flex-col items-center"
@@ -79,15 +92,15 @@ const themeClasses = computed(() => {
     <div class="flex w-full max-w-md flex-col items-center px-4 py-12">
       <div class="mb-8 flex flex-col items-center text-center">
         <div
-          v-if="profile.avatar"
+          v-if="getAvatarUrl"
           class="mb-4 h-24 w-24 overflow-hidden rounded-full border-2 border-primary"
         >
-          <img :src="profile.avatar" :alt="profile.title" class="h-full w-full object-cover" />
+          <img :src="getAvatarUrl" :alt="profile.title" class="h-full w-full object-cover" />
         </div>
         <div v-else class="mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-primary/10 text-primary">
-          <span class="text-2xl font-bold">{{ profile.user.name.charAt(0) }}</span>
+          <span class="text-2xl font-bold">{{ profile.user?.name?.charAt(0) || '?' }}</span>
         </div>
-        <h1 class="mb-1 text-2xl font-bold">{{ profile.title || `${profile.user.name}'s Links` }}</h1>
+        <h1 class="mb-1 text-2xl font-bold">{{ profile.title || (profile.user?.name ? `${profile.user.name}'s Links` : 'Links') }}</h1>
         <p v-if="profile.description" class="text-sm opacity-80">{{ profile.description }}</p>
       </div>
 

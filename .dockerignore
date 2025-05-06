@@ -1,0 +1,43 @@
+# Git
+.git
+.gitignore
+.github
+
+# Ambiente de desenvolvimento
+.env.example
+.editorconfig
+.prettierrc
+.prettierignore
+
+# Node.js
+node_modules
+npm-debug.log
+
+# Vendor
+/vendor
+/.phpunit.cache
+
+# Arquivos de cache
+/bootstrap/cache/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/logs/*
+
+# Manter os arquivos necessários
+!/database/database.sqlite
+!/storage/app/public
+!/storage/app/public/avatars
+!/public/storage
+
+# Docker
+docker-compose.yml
+Dockerfile
+.dockerignore
+
+# Outros
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed 

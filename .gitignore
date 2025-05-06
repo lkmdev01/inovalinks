@@ -24,3 +24,7 @@ yarn-error.log
 /.zed
 # /database/database.sqlite
 # /database/*.sqlite
+
+# Ignorar arquivos de upload, exceto .gitkeep
+/storage/app/public/avatars/*
+!/storage/app/public/avatars/.gitkeep

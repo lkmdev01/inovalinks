@@ -57,6 +57,13 @@ watch(() => form.avatar_file, (newFile) => {
   }
 });
 
+// Para garantir que a URL do avatar seja exibida corretamente
+watch(() => form.avatar, (newUrl) => {
+  if (newUrl && !form.avatar_file) {
+    avatarPreview.value = newUrl;
+  }
+});
+
 const themes = [
   { id: 'default', name: 'Padrão', bg: 'bg-white', text: 'text-black' },
   { id: 'dark', name: 'Escuro', bg: 'bg-gray-900', text: 'text-white' },
@@ -82,6 +89,10 @@ function handleFileChange(event: Event) {
 function submit() {
   form.post('/profile', {
     forceFormData: true,
+    onSuccess: () => {
+      // Limpa o arquivo após o sucesso para evitar conflitos
+      form.avatar_file = null;
+    }
   });
 }
 </script>
@@ -102,23 +113,21 @@ function submit() {
         </Link>
       </div>
 
-      <div class="rounded-lg border bg-card">
-        <div class="p-6">
-          <Tabs class="w-full" default-value="general">
-            <TabsList class="mb-4">
-              <TabsTrigger value="general">Informações</TabsTrigger>
-              <TabsTrigger value="appearance">Aparência</TabsTrigger>
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-5">
+        <div class="col-span-1 lg:col-span-5">
+          <Tabs default-value="profile" class="w-full">
+            <TabsList class="grid w-full grid-cols-1">
+              <TabsTrigger value="profile">Perfil</TabsTrigger>
             </TabsList>
-
-            <TabsContent value="general">
-              <form @submit.prevent="submit" class="space-y-4">
-                <div>
+            <TabsContent value="profile">
+              <form @submit.prevent="submit" class="space-y-6">
+                <div class="space-y-4">
                   <label for="title" class="mb-2 block text-sm font-medium">Título</label>
                   <input
                     id="title"
                     v-model="form.title"
                     type="text"
-                    class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     placeholder="Meus Links"
                   />
                   <div v-if="form.errors.title" class="mt-1 text-sm text-red-500">
@@ -126,29 +135,32 @@ function submit() {
                   </div>
                 </div>
 
-                <div>
+                <div class="space-y-4">
                   <label for="description" class="mb-2 block text-sm font-medium">Descrição</label>
                   <Textarea
                     id="description"
                     v-model="form.description"
-                    placeholder="Uma breve descrição sobre você ou seus links"
+                    rows="3"
+                    class="resize-none"
+                    placeholder="Um pouco sobre mim ou meus links..."
                   />
                   <div v-if="form.errors.description" class="mt-1 text-sm text-red-500">
                     {{ form.errors.description }}
                   </div>
                 </div>
 
-                <div>
+                <div class="space-y-4">
                   <label for="slug" class="mb-2 block text-sm font-medium">URL Personalizada</label>
                   <div class="flex items-center">
-                    <span class="mr-1 text-sm text-muted-foreground">/</span>
+                    <span class="rounded-l-md border border-r-0 border-input px-3 py-2 text-sm text-gray-500">
+                      inovalinks.com/
+                    </span>
                     <input
                       id="slug"
                       v-model="form.slug"
                       type="text"
-                      class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      placeholder="meu-nome"
-                      required
+                      class="flex-1 rounded-r-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      placeholder="seu-nome"
                     />
                   </div>
                   <div v-if="form.errors.slug" class="mt-1 text-sm text-red-500">
@@ -156,39 +168,20 @@ function submit() {
                   </div>
                 </div>
 
-                <div class="flex justify-end pt-4">
-                  <button
-                    type="submit"
-                    class="rounded-md border-white border-1 px-4 py-2 text-white hover:bg-zinc-800"
-                    :disabled="form.processing"
-                  >
-                    {{ form.processing ? 'Salvando...' : 'Salvar Alterações' }}
-                  </button>
-                </div>
-              </form>
-            </TabsContent>
-
-            <TabsContent value="appearance">
-              <form @submit.prevent="submit" enctype="multipart/form-data" class="space-y-6">
-                <div>
-                  <label class="mb-4 block text-sm font-medium">Tema</label>
-                  <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+                <div class="space-y-4">
+                  <label class="mb-2 block text-sm font-medium">Tema</label>
+                  <div class="grid grid-cols-3 gap-3 sm:grid-cols-6">
                     <button
                       v-for="theme in themes"
                       :key="theme.id"
                       type="button"
-                      class="relative flex aspect-[3/2] flex-col items-center justify-center rounded-lg border p-3 transition-colors"
-                      :class="[
-                        form.theme === theme.id
-                          ? 'border-primary bg-primary/10'
-                          : 'border-input hover:bg-accent',
-                        theme.bg,
-                        theme.text,
-                      ]"
                       @click="form.theme = theme.id"
-                    >
-                      <span class="font-medium">{{ theme.name }}</span>
-                    </button>
+                      class="aspect-square h-12 rounded-md border border-gray-200 transition focus:outline-none focus:ring-2 focus:ring-ring"
+                      :class="[
+                        theme.bg,
+                        form.theme === theme.id ? 'ring-2 ring-primary' : '',
+                      ]"
+                    />
                   </div>
                 </div>
 

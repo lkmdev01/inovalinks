@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import { type BreadcrumbItem } from '@/types';
 import { PlusCircle, Trash2, Pencil, GripVertical } from 'lucide-vue-next';
 import DynamicIcon from '@/components/ui/DynamicIcon.vue';
@@ -62,7 +62,12 @@ function onDrop(targetLink: LinkItem, event: DragEvent) {
       // Preparar os IDs ordenados para enviar ao servidor
       const orderedIds = links.value.map(link => link.id);
       form.ordered_ids = orderedIds;
-      form.post('/links/order');
+      form.post('/links/order', {
+        preserveScroll: true,
+        onSuccess: () => {
+          // Já atualizado no server, não precisa fazer nada
+        }
+      });
     }
   }
   dragging.value = false;
@@ -79,7 +84,38 @@ function toggleActive(link: LinkItem) {
     url: link.url,
     icon: link.icon,
     is_active: !link.is_active,
-  }).put(`/links/${link.id}`);
+  }).put(`/links/${link.id}`, {
+    preserveScroll: true,
+    onSuccess: () => {
+      // Atualizando o link localmente para responsividade imediata
+      const linkIndex = links.value.findIndex(l => l.id === link.id);
+      if (linkIndex !== -1) {
+        links.value[linkIndex].is_active = !links.value[linkIndex].is_active;
+      }
+    }
+  });
+}
+
+function deleteLink(id: number) {
+  // Primeiro remover o link da interface para resposta imediata
+  const index = links.value.findIndex(link => link.id === id);
+  if (index !== -1) {
+    const removedLink = links.value.splice(index, 1)[0];
+    
+    // Então enviar a requisição para o servidor
+    fetch(`/links/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-Inertia': 'true',
+      },
+    }).catch(() => {
+      // Em caso de erro, reinsere o link na lista
+      links.value.splice(index, 0, removedLink);
+    });
+  }
 }
 </script>
 
@@ -133,14 +169,12 @@ function toggleActive(link: LinkItem) {
                 >
                   <Pencil class="h-4 w-4" />
                 </Link>
-                <Link
-                  :href="`/links/${link.id}`"
-                  method="delete"
-                  as="button"
+                <button
+                  @click="deleteLink(link.id)"
                   class="rounded-md p-2 text-muted-foreground hover:bg-destructive hover:text-destructive-foreground"
                 >
                   <Trash2 class="h-4 w-4" />
-                </Link>
+                </button>
               </div>
             </li>
           </ul>

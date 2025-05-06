@@ -32,12 +32,18 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
+// Verificar se o avatar é um caminho de storage local ou uma URL externa
+const isLocalStorageAvatar = computed(() => {
+  return props.profile.avatar?.startsWith('/storage/');
+});
+
 const form = useForm({
   title: props.profile.title || '',
   description: props.profile.description || '',
   slug: props.profile.slug,
   theme: props.profile.theme || 'default',
-  avatar: props.profile.avatar || '',
+  // Se for um avatar de storage local, não mostra no campo de URL
+  avatar: isLocalStorageAvatar.value ? '' : (props.profile.avatar || ''),
   avatar_file: null as File | null,
 });
 
@@ -52,6 +58,8 @@ watch(() => form.avatar_file, (newFile) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       avatarPreview.value = e.target?.result as string;
+      // Quando um arquivo é selecionado, limpa o campo de URL
+      form.avatar = '';
     };
     reader.readAsDataURL(newFile);
   }
@@ -65,12 +73,24 @@ watch(() => form.avatar, (newUrl) => {
 });
 
 const themes = [
-  { id: 'default', name: 'Padrão', bg: 'bg-white', text: 'text-black' },
-  { id: 'dark', name: 'Escuro', bg: 'bg-gray-900', text: 'text-white' },
-  { id: 'blue', name: 'Azul', bg: 'bg-blue-100', text: 'text-blue-900' },
-  { id: 'green', name: 'Verde', bg: 'bg-green-100', text: 'text-green-900' },
-  { id: 'purple', name: 'Roxo', bg: 'bg-purple-100', text: 'text-purple-900' },
-  { id: 'pink', name: 'Rosa', bg: 'bg-pink-100', text: 'text-pink-900' },
+  { id: 'default', name: 'Padrão', bg: 'bg-white', text: 'text-gray-900', border: 'border-gray-200' },
+  { id: 'dark', name: 'Escuro', bg: 'bg-gray-900', text: 'text-white', border: 'border-gray-700' },
+  { id: 'blue', name: 'Azul', bg: 'bg-blue-100', text: 'text-blue-900', border: 'border-blue-200' },
+  { id: 'green', name: 'Verde', bg: 'bg-green-100', text: 'text-green-900', border: 'border-green-200' },
+  { id: 'purple', name: 'Roxo', bg: 'bg-purple-100', text: 'text-purple-900', border: 'border-purple-200' },
+  { id: 'pink', name: 'Rosa', bg: 'bg-pink-100', text: 'text-pink-900', border: 'border-pink-200' },
+  { id: 'gray', name: 'Cinza', bg: 'bg-gray-100', text: 'text-gray-900', border: 'border-gray-200' },
+  { id: 'red', name: 'Vermelho', bg: 'bg-red-100', text: 'text-red-900', border: 'border-red-200' },
+  { id: 'yellow', name: 'Amarelo', bg: 'bg-yellow-100', text: 'text-yellow-900', border: 'border-yellow-200' },
+  { id: 'indigo', name: 'Índigo', bg: 'bg-indigo-100', text: 'text-indigo-900', border: 'border-indigo-200' },
+  { id: 'teal', name: 'Turquesa', bg: 'bg-teal-100', text: 'text-teal-900', border: 'border-teal-200' },
+  { id: 'blue-dark', name: 'Azul Escuro', bg: 'bg-blue-900', text: 'text-white', border: 'border-blue-700' },
+  { id: 'green-dark', name: 'Verde Escuro', bg: 'bg-green-900', text: 'text-white', border: 'border-green-700' },
+  { id: 'purple-dark', name: 'Roxo Escuro', bg: 'bg-purple-900', text: 'text-white', border: 'border-purple-700' },
+  { id: 'pink-dark', name: 'Rosa Escuro', bg: 'bg-pink-900', text: 'text-white', border: 'border-pink-700' },
+  { id: 'amber', name: 'Âmbar', bg: 'bg-amber-100', text: 'text-amber-900', border: 'border-amber-200' },
+  { id: 'lime', name: 'Lima', bg: 'bg-lime-100', text: 'text-lime-900', border: 'border-lime-200' },
+  { id: 'cyan', name: 'Ciano', bg: 'bg-cyan-100', text: 'text-cyan-900', border: 'border-cyan-200' },
 ];
 
 function triggerFileInput() {
@@ -83,15 +103,27 @@ function handleFileChange(event: Event) {
   const input = event.target as HTMLInputElement;
   if (input.files && input.files.length > 0) {
     form.avatar_file = input.files[0];
+    // Quando um arquivo é selecionado, limpa o campo de URL
+    form.avatar = '';
   }
 }
 
 function submit() {
+  // Se não houver um novo arquivo e já existe um avatar, garante que o campo avatar não seja apagado
+  if (!form.avatar_file && avatarPreview.value && !form.avatar) {
+    form.avatar = props.profile.avatar || '';
+  }
+
   form.post('/profile', {
     forceFormData: true,
     onSuccess: () => {
       // Limpa o arquivo após o sucesso para evitar conflitos
       form.avatar_file = null;
+      
+      // Se o resultado for um avatar de storage, limpa o campo de URL para a próxima edição
+      if (props.profile.avatar?.startsWith('/storage/')) {
+        form.avatar = '';
+      }
     }
   });
 }
@@ -116,9 +148,6 @@ function submit() {
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-5">
         <div class="col-span-1 lg:col-span-5">
           <Tabs default-value="profile" class="w-full">
-            <TabsList class="grid w-full grid-cols-1">
-              <TabsTrigger value="profile">Perfil</TabsTrigger>
-            </TabsList>
             <TabsContent value="profile">
               <form @submit.prevent="submit" class="space-y-6">
                 <div class="space-y-4">
@@ -170,18 +199,29 @@ function submit() {
 
                 <div class="space-y-4">
                   <label class="mb-2 block text-sm font-medium">Tema</label>
-                  <div class="grid grid-cols-3 gap-3 sm:grid-cols-6">
+                  <div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
                     <button
                       v-for="theme in themes"
                       :key="theme.id"
                       type="button"
                       @click="form.theme = theme.id"
-                      class="aspect-square h-12 rounded-md border border-gray-200 transition focus:outline-none focus:ring-2 focus:ring-ring"
+                      class="flex h-24 flex-col items-center justify-center rounded-md border transition focus:outline-none focus:ring-2 focus:ring-ring hover:opacity-90"
                       :class="[
                         theme.bg,
-                        form.theme === theme.id ? 'ring-2 ring-primary' : '',
+                        theme.text,
+                        theme.border,
+                        form.theme === theme.id ? 'ring-2 ring-primary shadow-md' : '',
                       ]"
-                    />
+                    >
+                      <div class="flex h-full w-full flex-col items-center justify-center">
+                        <span class="font-medium">{{ theme.name }}</span>
+                        <div class="mt-2 flex space-x-1">
+                          <div class="h-2 w-12 rounded-full bg-current opacity-80"></div>
+                          <div class="h-2 w-8 rounded-full bg-current opacity-60"></div>
+                          <div class="h-2 w-4 rounded-full bg-current opacity-40"></div>
+                        </div>
+                      </div>
+                    </button>
                   </div>
                 </div>
 
@@ -232,6 +272,9 @@ function submit() {
                         <div v-if="form.errors.avatar" class="mt-1 text-sm text-red-500">
                           {{ form.errors.avatar }}
                         </div>
+                        <p v-if="isLocalStorageAvatar" class="mt-1 text-xs text-muted-foreground">
+                          Você está usando uma imagem carregada. Para substituí-la, envie uma nova imagem ou use uma URL.
+                        </p>
                       </div>
                     </div>
                   </div>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, router } from '@inertiajs/vue3';
 import { type BreadcrumbItem } from '@/types';
 import { getIcon, type IconName } from '@/components/ui/dynamic-icon';
 import DynamicIcon from '@/components/ui/DynamicIcon.vue';
@@ -30,13 +30,53 @@ const form = useForm({
   is_active: true,
 });
 
-// Lista de ícones disponíveis
-const availableIcons = computed(() => {
-  return ['github', 'twitter', 'instagram', 'linkedin', 'facebook', 'youtube', 'code', 'link'];
+// Lista de ícones disponíveis agrupados por categoria
+type IconCategoryType = {
+  [key: string]: string[];
+};
+
+const iconCategories = computed<IconCategoryType>(() => {
+  return {
+    'Redes Sociais': [
+      'instagram', 'facebook', 'twitter', 'x', 'linkedin', 'github', 'youtube', 
+      'tiktok', 'pinterest', 'twitch', 'discord', 'slack', 'dribbble', 'behance', 'figma'
+    ],
+    'Comunicação': [
+      'mail', 'phone', 'whatsapp', 'telegram', 'chat'
+    ],
+    'Web': [
+      'link', 'website', 'globe', 'code', 'qrcode'
+    ],
+    'Mídia': [
+      'music', 'spotify', 'video', 'camera', 'podcast'
+    ],
+    'Compras': [
+      'store', 'shopping', 'wallet', 'payment'
+    ],
+    'Profissional': [
+      'portfolio', 'education', 'document', 'bookmark', 'work'
+    ],
+    'Outros': [
+      'heart', 'star', 'coffee', 'restaurant', 'map', 'award', 'share'
+    ]
+  };
 });
 
+// Lista completa de ícones para compatibilidade com o código existente
+const availableIcons = computed(() => {
+  return Object.values(iconCategories.value).flat();
+});
+
+// Categoria selecionada
+const selectedCategory = ref('Redes Sociais');
+
 function submit() {
-  form.post('/links');
+  form.post('/links', {
+    onSuccess: () => {
+      // Redirecionar usando caminho relativo, sem protocolo ou domínio
+      window.location.href = '/links';
+    }
+  });
 }
 </script>
 
@@ -89,9 +129,23 @@ function submit() {
 
           <div>
             <label class="mb-2 block text-sm font-medium">Ícone</label>
-            <div class="grid grid-cols-4 gap-2 sm:grid-cols-8">
+            
+            <div class="mb-4 flex flex-wrap gap-2">
               <button
-                v-for="icon in availableIcons"
+                v-for="category in Object.keys(iconCategories)"
+                :key="category"
+                type="button"
+                class="rounded-md px-3 py-1 text-sm transition-colors"
+                :class="selectedCategory === category ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'"
+                @click="selectedCategory = category"
+              >
+                {{ category }}
+              </button>
+            </div>
+            
+            <div class="grid grid-cols-4 gap-2 md:grid-cols-8 lg:grid-cols-10">
+              <button
+                v-for="icon in iconCategories[selectedCategory]"
                 :key="icon"
                 type="button"
                 class="flex aspect-square items-center justify-center rounded-md border p-2 transition-colors"
@@ -101,6 +155,7 @@ function submit() {
                 <DynamicIcon :name="icon" />
               </button>
             </div>
+            
             <div v-if="form.errors.icon" class="mt-1 text-sm text-red-500">
               {{ form.errors.icon }}
             </div>

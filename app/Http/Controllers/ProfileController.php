@@ -45,6 +45,8 @@ class ProfileController extends Controller
             'avatar_file' => 'nullable|image|max:1024',
         ]);
 
+        $profile = Auth::user()->profile;
+        
         // Remove avatar_file do array validado antes de atualizar o perfil
         if (isset($validated['avatar_file'])) {
             unset($validated['avatar_file']);
@@ -53,7 +55,7 @@ class ProfileController extends Controller
         // Se um arquivo foi enviado, faça o upload
         if ($request->hasFile('avatar_file')) {
             // Remova o avatar antigo se não for uma URL externa
-            $oldAvatar = Auth::user()->profile->avatar;
+            $oldAvatar = $profile->avatar;
             if ($oldAvatar && !filter_var($oldAvatar, FILTER_VALIDATE_URL)) {
                 // Limpa o caminho para encontrar o arquivo
                 $oldPath = str_replace('/storage/', '', $oldAvatar);
@@ -65,9 +67,13 @@ class ProfileController extends Controller
             // Salve o novo avatar e armazene apenas o path relativo
             $path = $request->file('avatar_file')->store('avatars', 'public');
             $validated['avatar'] = '/storage/' . $path;
+        } 
+        // Se o avatar estiver vazio no envio, mas existir um avatar anterior, mantenha o anterior
+        elseif (empty($validated['avatar']) && $profile->avatar) {
+            $validated['avatar'] = $profile->avatar;
         }
 
-        Auth::user()->profile->update($validated);
+        $profile->update($validated);
 
         return Redirect::route('linktree.profile.edit');
     }

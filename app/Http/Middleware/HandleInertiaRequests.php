@@ -39,14 +39,6 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
-        // Criar uma instância personalizada do Ziggy com a porta correta
-        $ziggy = new Ziggy;
-        $ziggyArray = $ziggy->toArray();
-        
-        // Atualizar a URL e a porta
-        $ziggyArray['url'] = 'http://localhost:8005';
-        $ziggyArray['port'] = 8005;
-
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -54,10 +46,11 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
-            'ziggy' => [
-                ...$ziggyArray,
-                'location' => $request->url(),
-            ],
+            'ziggy' => function () use ($request) {
+                return array_merge((new Ziggy)->toArray(), [
+                    'location' => $request->url(),
+                ]);
+            },
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

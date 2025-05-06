@@ -43,20 +43,17 @@ RUN mkdir -p /var/www/storage/logs
 RUN touch /var/www/storage/logs/laravel.log
 RUN mkdir -p /var/www/database
 RUN touch /var/www/database/database.sqlite
+RUN chmod 777 /var/www/database/database.sqlite
 RUN mkdir -p /var/www/storage/app/public/avatars
 RUN chown -R $user:www-data /var/www
 RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache /var/www/database /var/www/public
 # Garantindo que os diretórios de uploads tenham permissões especiais
 RUN chmod -R 777 /var/www/storage/app/public
 RUN chmod -R 777 /var/www/storage/app/public/avatars
+RUN chmod -R 777 /var/www/bootstrap/cache
 
 # Executa comandos de instalação e otimização
-RUN composer install --optimize-autoloader
-RUN php artisan config:cache
-RUN php artisan route:cache
-RUN php artisan view:cache
-
-# Cria link simbólico do storage para os uploads
+RUN composer install --optimize-autoloader --no-dev
 RUN php -r "file_exists('/var/www/public/storage') || symlink('/var/www/storage/app/public', '/var/www/public/storage');"
 # Não modificamos as permissões do symlink aqui, deixamos para o script post-build
 

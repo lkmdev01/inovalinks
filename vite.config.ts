@@ -38,4 +38,5 @@ export default defineConfig({
             usePolling: true,
         },
     },
+    base: process.env.NODE_ENV === 'production' ? 'https://inovalinks-production.up.railway.app/build/' : '/build/'
 });

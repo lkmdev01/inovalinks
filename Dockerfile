@@ -54,6 +54,12 @@ RUN chmod -R 777 /var/www/bootstrap/cache
 
 # Executa comandos de instalação e otimização
 RUN composer install --optimize-autoloader --no-dev
+
+# Instala dependências do NPM e compila os assets
+RUN npm install
+RUN npm run build
+
+# Cria link simbólico do storage para os uploads
 RUN php -r "file_exists('/var/www/public/storage') || symlink('/var/www/storage/app/public', '/var/www/public/storage');"
 # Não modificamos as permissões do symlink aqui, deixamos para o script post-build
 

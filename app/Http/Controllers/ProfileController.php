@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
+use Jenssegers\Agent\Agent;
 
 class ProfileController extends Controller
 {
@@ -41,6 +42,7 @@ class ProfileController extends Controller
             'description' => 'nullable|string|max:1000',
             'slug' => 'required|string|max:255|unique:profiles,slug,' . Auth::user()->profile->id,
             'theme' => 'nullable|string|max:255',
+            'font' => 'nullable|string|max:255',
             'avatar' => 'nullable|string|max:2048',
             'avatar_file' => 'nullable|image|max:1024',
         ]);
@@ -90,5 +92,38 @@ class ProfileController extends Controller
             'profile' => $profile,
             'links' => $links,
         ]);
+    }
+    
+    /**
+     * Record a visit to a link and redirect to the destination URL.
+     */
+    public function visitLink(Request $request, string $slug, int $linkId): RedirectResponse
+    {
+        $profile = Profile::where('slug', $slug)->firstOrFail();
+        $link = $profile->links()->where('id', $linkId)->where('is_active', true)->firstOrFail();
+        
+        // Detectar dispositivo
+        $agent = new Agent();
+        $agent->setUserAgent($request->userAgent());
+        
+        $deviceType = 'desktop';
+        if ($agent->isTablet()) {
+            $deviceType = 'tablet';
+        } elseif ($agent->isMobile()) {
+            $deviceType = 'mobile';
+        }
+        
+        // Registrar a visita
+        $profile->visits()->create([
+            'link_id' => $link->id,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'referer' => $request->header('referer'),
+            'device_type' => $deviceType,
+            // Nota: para país e cidade, você precisaria de um serviço de geolocalização de IP
+            // como MaxMind GeoIP ou IP-API
+        ]);
+        
+        return Redirect::away($link->url);
     }
 } 

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\LinkController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StatisticsController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
@@ -44,10 +45,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('links/order', [LinkController::class, 'updateOrder'])->name('links.order');
     Route::get('profile/edit', [ProfileController::class, 'edit'])->name('linktree.profile.edit');
     Route::post('profile', [ProfileController::class, 'update'])->name('linktree.profile.update');
+    
+    // Rotas de estatísticas
+    Route::get('statistics', [StatisticsController::class, 'index'])->name('statistics.index');
+    Route::get('statistics/link/{link}', [StatisticsController::class, 'linkDetails'])->name('statistics.link');
 });
 
-// Public profile route
+// Public profile routes
 Route::get('/{slug}', [ProfileController::class, 'show'])->name('profile.show');
+Route::get('/{slug}/link/{linkId}', [ProfileController::class, 'visitLink'])->name('profile.visit-link');
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

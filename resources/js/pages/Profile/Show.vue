@@ -10,6 +10,7 @@ interface Profile {
   slug: string;
   avatar: string | null;
   theme: string;
+  font: string;
   user?: {
     name: string;
   };
@@ -20,6 +21,20 @@ interface Link {
   title: string;
   url: string;
   icon: string;
+}
+
+// Definindo interfaces para tipagem
+interface ThemeStyle {
+  bg: string;
+  text: string;
+  card: string;
+}
+
+interface GradientColor {
+  from: string;
+  to: string;
+  text: string;
+  card: string;
 }
 
 const props = defineProps<{
@@ -40,10 +55,18 @@ const getAvatarUrl = computed(() => {
   return props.profile.avatar;
 });
 
+// Classe da fonte selecionada
+const fontClass = computed(() => {
+  return `font-${props.profile.font || 'inter'}`;
+});
+
 // Mapeamento de temas para suas respectivas classes CSS
 const themeClasses = computed(() => {
+  const theme = props.profile.theme;
+  console.log('Tema aplicado:', theme);
+  
   // Temas claros
-  const lightThemes = {
+  const lightThemes: Record<string, ThemeStyle> = {
     'default': {
       bg: 'bg-white',
       text: 'text-gray-900',
@@ -112,7 +135,7 @@ const themeClasses = computed(() => {
   };
   
   // Temas escuros
-  const darkThemes = {
+  const darkThemes: Record<string, ThemeStyle> = {
     'dark': {
       bg: 'bg-gray-900',
       text: 'text-white',
@@ -140,11 +163,115 @@ const themeClasses = computed(() => {
     },
   };
   
+  // Cores base dos gradientes
+  const gradientBaseColors: Record<string, GradientColor> = {
+    'blue-purple': {
+      from: 'from-blue-500',
+      to: 'to-purple-500',
+      text: 'text-white',
+      card: 'bg-white hover:bg-gray-50 border-blue-300 text-gray-900',
+    },
+    'green-blue': {
+      from: 'from-green-400',
+      to: 'to-blue-500',
+      text: 'text-white',
+      card: 'bg-white hover:bg-gray-50 border-green-300 text-gray-900',
+    },
+    'pink-orange': {
+      from: 'from-pink-500',
+      to: 'to-orange-400',
+      text: 'text-white',
+      card: 'bg-white hover:bg-gray-50 border-pink-300 text-gray-900',
+    },
+    'indigo-cyan': {
+      from: 'from-indigo-500',
+      to: 'to-cyan-400',
+      text: 'text-white',
+      card: 'bg-white hover:bg-gray-50 border-indigo-300 text-gray-900',
+    },
+    'purple-pink': {
+      from: 'from-purple-600',
+      to: 'to-pink-500',
+      text: 'text-white',
+      card: 'bg-white hover:bg-gray-50 border-purple-300 text-gray-900',
+    },
+    'yellow-red': {
+      from: 'from-yellow-400',
+      to: 'to-red-500',
+      text: 'text-white',
+      card: 'bg-white hover:bg-gray-50 border-yellow-300 text-gray-900',
+    },
+    'red-black': {
+      from: 'from-red-700',
+      to: 'to-gray-900',
+      text: 'text-white',
+      card: 'bg-gray-800 hover:bg-gray-700 border-red-800 text-white',
+    },
+    'dark-blue': {
+      from: 'from-gray-900',
+      to: 'to-blue-900',
+      text: 'text-white',
+      card: 'bg-gray-800 hover:bg-gray-700 border-blue-900 text-white',
+    },
+    'dark-purple': {
+      from: 'from-gray-800',
+      to: 'to-purple-900',
+      text: 'text-white',
+      card: 'bg-gray-800 hover:bg-gray-700 border-purple-900 text-white',
+    },
+    'metal': {
+      from: 'from-gray-400',
+      to: 'to-gray-600',
+      text: 'text-white',
+      card: 'bg-gray-700 hover:bg-gray-600 border-gray-500 text-white',
+    },
+    'steel': {
+      from: 'from-slate-400',
+      to: 'to-slate-600',
+      text: 'text-white',
+      card: 'bg-slate-700 hover:bg-slate-600 border-slate-500 text-white',
+    },
+    'black-gold': {
+      from: 'from-gray-900',
+      to: 'to-yellow-600',
+      text: 'text-white',
+      card: 'bg-gray-800 hover:bg-gray-700 border-yellow-700 text-white',
+    },
+  };
+  
+  // Cria temas para todos os gradientes
+  let gradientThemes: Record<string, ThemeStyle> = {};
+  
+  // Verificar se o tema atual é um gradiente
+  if (theme && theme.startsWith('gradient-')) {
+    // Extrair o id das cores (por exemplo, gradient-blue-purple -> blue-purple)
+    const colorKey = theme.replace('gradient-', '');
+    
+    if (colorKey in gradientBaseColors) {
+      // Criar tema com cor específica
+      gradientThemes[theme] = {
+        bg: `bg-gradient-to-r ${gradientBaseColors[colorKey].from} ${gradientBaseColors[colorKey].to}`,
+        text: gradientBaseColors[colorKey].text,
+        card: gradientBaseColors[colorKey].card,
+      };
+    }
+  }
+  
+  // Preencher temas para todas as combinações de cores
+  Object.keys(gradientBaseColors).forEach((colorKey) => {
+    const themeKey = `gradient-${colorKey}`;
+    gradientThemes[themeKey] = {
+      bg: `bg-gradient-to-r ${gradientBaseColors[colorKey].from} ${gradientBaseColors[colorKey].to}`,
+      text: gradientBaseColors[colorKey].text,
+      card: gradientBaseColors[colorKey].card,
+    };
+  });
+  
   // Combinar todos os temas
-  const allThemes = { ...lightThemes, ...darkThemes };
+  const allThemes: Record<string, ThemeStyle> = { ...lightThemes, ...darkThemes, ...gradientThemes };
   
   // Retornar o tema selecionado ou o tema padrão
-  return allThemes[props.profile.theme as keyof typeof allThemes] || allThemes.default;
+  return allThemes[theme as string] || allThemes.default;
 });
 </script>
 
@@ -153,7 +280,7 @@ const themeClasses = computed(() => {
 
   <div
     class="flex min-h-screen flex-col items-center"
-    :class="[themeClasses.bg, themeClasses.text]"
+    :class="[themeClasses.bg, themeClasses.text, fontClass]"
   >
     <div class="flex w-full max-w-md flex-col items-center px-4 py-12">
       <div class="mb-8 flex flex-col items-center text-center">
@@ -174,9 +301,7 @@ const themeClasses = computed(() => {
         <a
           v-for="link in links"
           :key="link.id"
-          :href="link.url"
-          target="_blank"
-          rel="noopener noreferrer"
+          :href="`/${profile.slug}/link/${link.id}`"
           class="flex w-full items-center justify-center gap-2 rounded-md border p-3 text-center font-medium transition-all"
           :class="themeClasses.card"
         >

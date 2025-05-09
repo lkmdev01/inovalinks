@@ -23,6 +23,7 @@ class Profile extends Model
         'slug',
         'avatar',
         'theme',
+        'font',
     ];
 
     /**
@@ -39,5 +40,13 @@ class Profile extends Model
     public function links(): HasMany
     {
         return $this->hasMany(Link::class);
+    }
+
+    /**
+     * Get all visits for the profile's links.
+     */
+    public function visits(): HasMany
+    {
+        return $this->hasMany(LinkVisit::class);
     }
 } 

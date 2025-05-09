@@ -186,7 +186,7 @@ const themeClasses = computed(() => {
       </div>
 
       <div class="mt-12 text-sm opacity-70">
-        <p>Powered by Laravue LinkTree</p>
+        <p>Powered by <a href="https://inovaforce.com" target="_blank" rel="noopener noreferrer" class="font-semibold">inovaforce.com</a></p>
       </div>
     </div>
   </div>

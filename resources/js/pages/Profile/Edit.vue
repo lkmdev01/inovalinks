@@ -139,7 +139,7 @@ function submit() {
         <Link
           :href="publicUrl"
           target="_blank"
-          class="rounded-md border-white border-1 px-4 py-2 text-white hover:bg-zinc-800"
+          class="rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
         >
           Ver Página Pública
         </Link>
@@ -147,8 +147,12 @@ function submit() {
 
       <div class="grid grid-cols-1 gap-6 lg:grid-cols-5">
         <div class="col-span-1 lg:col-span-5">
-          <Tabs default-value="profile" class="w-full">
-            <TabsContent value="profile">
+          <Tabs default-value="info" class="w-full">
+            <TabsList class="mb-4">
+              <TabsTrigger value="info">Informações</TabsTrigger>
+              <TabsTrigger value="theme">Tema</TabsTrigger>
+            </TabsList>
+            <TabsContent value="info">
               <form @submit.prevent="submit" class="space-y-6">
                 <div class="space-y-4">
                   <label for="title" class="mb-2 block text-sm font-medium">Título</label>
@@ -163,7 +167,6 @@ function submit() {
                     {{ form.errors.title }}
                   </div>
                 </div>
-
                 <div class="space-y-4">
                   <label for="description" class="mb-2 block text-sm font-medium">Descrição</label>
                   <Textarea
@@ -177,7 +180,6 @@ function submit() {
                     {{ form.errors.description }}
                   </div>
                 </div>
-
                 <div class="space-y-4">
                   <label for="slug" class="mb-2 block text-sm font-medium">URL Personalizada</label>
                   <div class="flex items-center">
@@ -196,7 +198,68 @@ function submit() {
                     {{ form.errors.slug }}
                   </div>
                 </div>
-
+                <div class="space-y-4">
+                  <label class="mb-2 block text-sm font-medium">Avatar</label>
+                  <div class="flex items-start gap-6">
+                    <div v-if="avatarPreview" class="relative h-32 w-32 overflow-hidden rounded-full border-2 border-primary">
+                      <img :src="avatarPreview" alt="Avatar preview" class="h-full w-full object-cover" />
+                    </div>
+                    <div v-else class="flex h-32 w-32 items-center justify-center rounded-full bg-gray-200 text-gray-500">
+                      <Image class="h-8 w-8" />
+                    </div>
+                    <div class="flex flex-1 flex-col gap-4">
+                      <div>
+                        <button 
+                          type="button" 
+                          @click="triggerFileInput"
+                          class="flex items-center gap-2 rounded-md border border-input px-4 py-2 text-sm font-medium transition-colors hover:bg-accent"
+                        >
+                          <Upload class="h-4 w-4" />
+                          <span>Enviar imagem</span>
+                        </button>
+                        <input
+                          ref="fileInputRef"
+                          type="file"
+                          accept="image/*"
+                          class="hidden"
+                          @change="handleFileChange"
+                        />
+                        <div v-if="form.errors.avatar_file" class="mt-1 text-sm text-red-500">
+                          {{ form.errors.avatar_file }}
+                        </div>
+                      </div>
+                      <div>
+                        <label for="avatar" class="mb-2 block text-sm font-medium">Ou use uma URL de imagem</label>
+                        <input
+                          id="avatar"
+                          v-model="form.avatar"
+                          type="url"
+                          class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          placeholder="https://exemplo.com/imagem.jpg"
+                        />
+                        <div v-if="form.errors.avatar" class="mt-1 text-sm text-red-500">
+                          {{ form.errors.avatar }}
+                        </div>
+                        <p v-if="isLocalStorageAvatar" class="mt-1 text-xs text-muted-foreground">
+                          Você está usando uma imagem carregada. Para substituí-la, envie uma nova imagem ou use uma URL.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex justify-end pt-4">
+                  <button
+                    type="submit"
+                    class="rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
+                    :disabled="form.processing"
+                  >
+                    {{ form.processing ? 'Salvando...' : 'Salvar Alterações' }}
+                  </button>
+                </div>
+              </form>
+            </TabsContent>
+            <TabsContent value="theme">
+              <form @submit.prevent="submit" class="space-y-6">
                 <div class="space-y-4">
                   <label class="mb-2 block text-sm font-medium">Tema</label>
                   <div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
@@ -224,66 +287,10 @@ function submit() {
                     </button>
                   </div>
                 </div>
-
-                <div class="space-y-4">
-                  <label class="mb-2 block text-sm font-medium">Avatar</label>
-                  
-                  <div class="flex items-start gap-6">
-                    <!-- Prévia do avatar -->
-                    <div v-if="avatarPreview" class="relative h-32 w-32 overflow-hidden rounded-full border-2 border-primary">
-                      <img :src="avatarPreview" alt="Avatar preview" class="h-full w-full object-cover" />
-                    </div>
-                    <div v-else class="flex h-32 w-32 items-center justify-center rounded-full bg-gray-200 text-gray-500">
-                      <Image class="h-8 w-8" />
-                    </div>
-                    
-                    <!-- Opções de upload -->
-                    <div class="flex flex-1 flex-col gap-4">
-                      <div>
-                        <button 
-                          type="button" 
-                          @click="triggerFileInput"
-                          class="flex items-center gap-2 rounded-md border border-input px-4 py-2 text-sm font-medium transition-colors hover:bg-accent"
-                        >
-                          <Upload class="h-4 w-4" />
-                          <span>Enviar imagem</span>
-                        </button>
-                        <input
-                          ref="fileInputRef"
-                          type="file"
-                          accept="image/*"
-                          class="hidden"
-                          @change="handleFileChange"
-                        />
-                        <div v-if="form.errors.avatar_file" class="mt-1 text-sm text-red-500">
-                          {{ form.errors.avatar_file }}
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label for="avatar" class="mb-2 block text-sm font-medium">Ou use uma URL de imagem</label>
-                        <input
-                          id="avatar"
-                          v-model="form.avatar"
-                          type="url"
-                          class="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                          placeholder="https://exemplo.com/imagem.jpg"
-                        />
-                        <div v-if="form.errors.avatar" class="mt-1 text-sm text-red-500">
-                          {{ form.errors.avatar }}
-                        </div>
-                        <p v-if="isLocalStorageAvatar" class="mt-1 text-xs text-muted-foreground">
-                          Você está usando uma imagem carregada. Para substituí-la, envie uma nova imagem ou use uma URL.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
                 <div class="flex justify-end pt-4">
                   <button
                     type="submit"
-                    class="rounded-md border-white border-1 px-4 py-2 text-white hover:bg-zinc-800"
+                    class="rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
                     :disabled="form.processing"
                   >
                     {{ form.processing ? 'Salvando...' : 'Salvar Alterações' }}

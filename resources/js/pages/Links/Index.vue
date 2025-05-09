@@ -128,7 +128,7 @@ function deleteLink(id: number) {
         <h1 class="text-2xl font-bold">Seus Links</h1>
         <Link
           href="/links/create"
-          class="flex items-center gap-2 rounded-md border-white border-1 px-4 py-2 text-white hover:bg-zinc-800"
+          class="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
         >
           <PlusCircle class="h-4 w-4" />
           <span>Novo Link</span>

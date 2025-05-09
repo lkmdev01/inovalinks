@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Support\Str;
 
 class LinkController extends Controller
 {
@@ -17,8 +18,16 @@ class LinkController extends Controller
      */
     public function index(): Response
     {
-        $links = Auth::user()->profile->links()->orderBy('order')->get();
-
+        $user = Auth::user();
+        // Garante que o perfil existe
+        if (!$user->profile) {
+            $user->profile()->create([
+                'title' => $user->name . ' Links',
+                'slug' => Str::slug($user->name . '-' . $user->id),
+            ]);
+            $user->refresh(); // Atualiza o modelo do usuário para pegar o novo perfil
+        }
+        $links = $user->profile->links()->orderBy('order')->get();
         return Inertia::render('Links/Index', [
             'links' => $links,
         ]);

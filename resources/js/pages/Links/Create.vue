@@ -89,7 +89,7 @@ function submit() {
         <h1 class="text-2xl font-bold">Criar Novo Link</h1>
         <Link
           href="/links"
-          class="rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent"
+          class="rounded-md bg-secondary px-4 py-2 text-secondary-foreground hover:bg-secondary/80"
         >
           Voltar
         </Link>
@@ -178,7 +178,7 @@ function submit() {
           <div class="flex justify-end">
             <button
               type="submit"
-              class="rounded-md border-white border-1 px-4 py-2 text-white hover:bg-zinc-800"
+              class="rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
               :disabled="form.processing"
             >
               {{ form.processing ? 'Salvando...' : 'Salvar Link' }}

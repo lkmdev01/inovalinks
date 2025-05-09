@@ -13,7 +13,7 @@ import { type BreadcrumbItem } from '@/types';
 
 const breadcrumbItems: BreadcrumbItem[] = [
     {
-        title: 'Password settings',
+        title: 'Configurações de senha',
         href: '/settings/password',
     },
 ];
@@ -52,15 +52,15 @@ const updatePassword = () => {
 
 <template>
     <AppLayout :breadcrumbs="breadcrumbItems">
-        <Head title="Password settings" />
+        <Head title="Configurações de senha" />
 
         <SettingsLayout>
             <div class="space-y-6">
-                <HeadingSmall title="Update password" description="Ensure your account is using a long, random password to stay secure" />
+                <HeadingSmall title="Atualizar senha" description="Certifique-se de que sua conta esteja usando uma senha longa e aleatória para permanecer segura" />
 
                 <form @submit.prevent="updatePassword" class="space-y-6">
                     <div class="grid gap-2">
-                        <Label for="current_password">Current password</Label>
+                        <Label for="current_password">Senha atual</Label>
                         <Input
                             id="current_password"
                             ref="currentPasswordInput"
@@ -74,7 +74,7 @@ const updatePassword = () => {
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="password">New password</Label>
+                        <Label for="password">Nova senha</Label>
                         <Input
                             id="password"
                             ref="passwordInput"
@@ -88,7 +88,7 @@ const updatePassword = () => {
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="password_confirmation">Confirm password</Label>
+                        <Label for="password_confirmation">Confirmar senha</Label>
                         <Input
                             id="password_confirmation"
                             v-model="form.password_confirmation"
@@ -101,7 +101,7 @@ const updatePassword = () => {
                     </div>
 
                     <div class="flex items-center gap-4">
-                        <Button :disabled="form.processing">Save password</Button>
+                        <Button :disabled="form.processing">Salvar senha</Button>
 
                         <Transition
                             enter-active-class="transition ease-in-out"

@@ -21,6 +21,20 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-vue-next';
 import { computed } from 'vue';
 
+interface AuthUser {
+    id: number;
+    name: string;
+    email: string;
+    avatar?: string;
+    email_verified_at: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+interface AuthProps {
+    user: AuthUser;
+}
+
 interface Props {
     breadcrumbs?: BreadcrumbItem[];
 }
@@ -30,7 +44,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const page = usePage();
-const auth = computed(() => page.props.auth);
+const auth = computed(() => (page.props.auth as AuthProps));
 
 const isCurrentRoute = computed(() => (url: string) => page.url === url);
 
@@ -177,7 +191,11 @@ const rightNavItems: NavItem[] = [
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" class="w-56">
-                            <UserMenuContent :user="auth.user" />
+                            <UserMenuContent :user="{
+                              ...auth.user,
+                              created_at: auth.user.created_at || '',
+                              updated_at: auth.user.updated_at || ''
+                            }" />
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>

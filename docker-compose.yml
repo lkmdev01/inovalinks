@@ -21,7 +21,12 @@ services:
       - APP_ENV=${APP_ENV:-local}
       - APP_DEBUG=${APP_DEBUG:-true}
       - APP_URL=${APP_URL:-http://localhost:8000}
-      - DB_CONNECTION=sqlite
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=inovalink
+      - DB_USERNAME=inovalink
+      - DB_PASSWORD=inovalink
       - SESSION_DRIVER=database
       - CACHE_DRIVER=database
       - QUEUE_CONNECTION=database
@@ -47,10 +52,28 @@ services:
     networks:
       - inovalink
 
+  mysql:
+    image: mysql:8.0
+    container_name: inovalink-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: inovalink
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: inovalink
+      MYSQL_PASSWORD: inovalink
+    ports:
+      - "3306:3306"
+    volumes:
+      - inovalink_mysql_data:/var/lib/mysql
+    networks:
+      - inovalink
+
 networks:
   inovalink:
     driver: bridge
 
 volumes:
   inovalink_storage:
+    driver: local
+  inovalink_mysql_data:
     driver: local

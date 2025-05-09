@@ -166,7 +166,7 @@ const page = usePage<PageProps>();
                         Que integrações com outras plataformas brasileiras seriam úteis?
                     </p>
                 </div>
-                <a href="mailto:feedback@inovalinks.com.br" class="inline-block rounded-md border border-emerald-600 px-6 py-3 font-medium text-emerald-600 transition hover:bg-emerald-600 hover:text-white dark:border-emerald-500 dark:text-emerald-500 dark:hover:bg-emerald-700 dark:hover:text-white">
+                <a href="mailto:lkmdev01@gmail.com" class="inline-block rounded-md border border-emerald-600 px-6 py-3 font-medium text-emerald-600 transition hover:bg-emerald-600 hover:text-white dark:border-emerald-500 dark:text-emerald-500 dark:hover:bg-emerald-700 dark:hover:text-white">
                     Enviar sugestões
                 </a>
             </div>

@@ -4,6 +4,8 @@ use App\Http\Controllers\LinkController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\NewPasswordController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
@@ -16,6 +18,21 @@ Route::get('/login', function () {
 Route::get('/register', function () {
     return Inertia::render('auth/Register');
 })->middleware(['guest'])->name('register');
+
+// Rotas para recuperação de senha
+Route::middleware(['guest'])->group(function () {
+    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
+        ->name('password.request');
+
+    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
+        ->name('password.email');
+
+    Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
+        ->name('password.reset');
+
+    Route::post('reset-password', [NewPasswordController::class, 'store'])
+        ->name('password.store');
+});
 
 Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
